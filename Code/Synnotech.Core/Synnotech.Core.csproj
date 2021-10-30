@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
+        <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
         <LangVersion>10.0</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
+        <ImplicitUsings>false</ImplicitUsings>
         <Nullable>enable</Nullable>
         <Authors>Synnotech AG</Authors>
         <Company>Synnotech AG</Company>
@@ -30,6 +30,9 @@ Synntech.Core 0.1.0
 
     <ItemGroup>
         <PackageReference Include="Light.GuardClauses" Version="9.0.0" />
+        <PackageReference Include="System.Threading.Tasks.Extensions"
+                          Version="4.5.4"
+                          Condition="'$(TargetFramework)' == 'netstandard2.0'" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
@@ -37,7 +40,7 @@ Synntech.Core 0.1.0
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="../../synnotech-logo.png" Pack="true" PackagePath="\"/>
+        <None Include="../../synnotech-logo.png" Pack="true" PackagePath="\" />
     </ItemGroup>
 
 </Project>
