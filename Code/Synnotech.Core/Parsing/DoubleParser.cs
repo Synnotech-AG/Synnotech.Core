@@ -5,7 +5,7 @@ using Light.GuardClauses;
 namespace Synnotech.Core.Parsing;
 
 /// <summary>
-/// Provides methods for parsing <see cref="double"/> values.
+/// Provides methods for parsing <see cref="double" /> values.
 /// </summary>
 public static class DoubleParser
 {
@@ -42,12 +42,21 @@ public static class DoubleParser
 
         var (numberOfCommas, indexOfLastComma, numberOfPoints, indexOfLastPoint) =
             FloatingPointSignAnalysis.AnalyseText(text.AsSpan());
-        if (numberOfCommas == 1 && numberOfPoints == 0)
-            return double.TryParse(text, style, Cultures.GermanCulture, out value);
-        if (numberOfCommas == 0 && numberOfPoints == 1)
-            return double.TryParse(text, style, Cultures.InvariantCulture, out value);
 
-        var targetCulture = indexOfLastComma > indexOfLastPoint ? Cultures.GermanCulture : Cultures.InvariantCulture;
+        CultureInfo targetCulture;
+        if (numberOfCommas == 0)
+        {
+            targetCulture = numberOfPoints is 0 or 1 ? Cultures.InvariantCulture : Cultures.GermanCulture;
+            return double.TryParse(text, style, targetCulture, out value);
+        }
+
+        if (numberOfPoints == 0)
+        {
+            targetCulture = numberOfCommas is 1 ? Cultures.GermanCulture : Cultures.InvariantCulture;
+            return double.TryParse(text, style, targetCulture, out value);
+        }
+
+        targetCulture = indexOfLastComma > indexOfLastPoint ? Cultures.GermanCulture : Cultures.InvariantCulture;
         return double.TryParse(text, style, targetCulture, out value);
     }
 }
