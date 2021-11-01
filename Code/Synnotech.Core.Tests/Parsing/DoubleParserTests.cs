@@ -35,7 +35,7 @@ public static class DoubleParserTests
 
     private static void CheckNumber(string text, double expectedValue)
     {
-        var result = DoubleParser.TryParseDouble(text, out var parsedValue);
+        var result = DoubleParser.TryParse(text, out var parsedValue);
 
         result.Should().BeTrue();
         parsedValue.Should().BeApproximately(expectedValue, Precision);
@@ -49,7 +49,7 @@ public static class DoubleParserTests
     [InlineData("9392gk381")]
     public static void InvalidNumber(string text)
     {
-        var result = DoubleParser.TryParseDouble(text, out var actualValue);
+        var result = DoubleParser.TryParse(text, out var actualValue);
 
         result.Should().BeFalse();
         actualValue.Should().Be(default);

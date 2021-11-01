@@ -19,8 +19,8 @@ public static class DoubleParser
     /// <param name="text">The text to be parsed.</param>
     /// <param name="value">The parsed double value.</param>
     /// <returns>True if parsing was successful, else false.</returns>
-    public static bool TryParseDouble(string text, out double value) =>
-        TryParseDouble(text, NumberStyles.Number, out value);
+    public static bool TryParse(string text, out double value) =>
+        TryParse(text, NumberStyles.Number, out value);
 
     /// <summary>
     /// Tries to parse the specified text to a double value. This method will
@@ -32,7 +32,7 @@ public static class DoubleParser
     /// <param name="style">The number style that describes what the parser has to handle.</param>
     /// <param name="value">The parsed double value.</param>
     /// <returns>True if parsing was successful, else false.</returns>
-    public static bool TryParseDouble(string text, NumberStyles style, out double value)
+    public static bool TryParse(string text, NumberStyles style, out double value)
     {
         if (text.IsNullOrWhiteSpace())
         {
