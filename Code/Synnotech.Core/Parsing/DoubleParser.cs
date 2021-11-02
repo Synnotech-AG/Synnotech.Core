@@ -23,7 +23,7 @@ public static class DoubleParser
     /// sign will be interpreted as the decimal sign by this method. We recognize that
     /// this scenario is rare, as especially human input will most likely never use
     /// the thousand-delimiter sign, but if you happen to have this scenario, please
-    /// use <see cref="double.TryParse(string, NumberStyles, IFormatProvider, out double)"/>
+    /// use <see cref="double.TryParse(string, NumberStyles, IFormatProvider, out double)" />
     /// instead and specify the corresponding culture info.
     /// </para>
     /// </summary>
@@ -46,7 +46,7 @@ public static class DoubleParser
     /// sign will be interpreted as the decimal sign by this method. We recognize that
     /// this scenario is rare, as especially human input will most likely never use
     /// the thousand-delimiter sign, but if you happen to have this scenario, please
-    /// use <see cref="double.TryParse(string, NumberStyles, IFormatProvider, out double)"/>
+    /// use <see cref="double.TryParse(string, NumberStyles, IFormatProvider, out double)" />
     /// instead and specify the corresponding culture info.
     /// </para>
     /// </summary>
@@ -62,23 +62,8 @@ public static class DoubleParser
             return false;
         }
 
-        var (numberOfCommas, indexOfLastComma, numberOfPoints, indexOfLastPoint) =
-            FloatingPointSignAnalysis.AnalyseText(text.AsSpan());
-
-        CultureInfo targetCulture;
-        if (numberOfCommas == 0)
-        {
-            targetCulture = numberOfPoints is 0 or 1 ? Cultures.InvariantCulture : Cultures.GermanCulture;
-            return double.TryParse(text, style, targetCulture, out value);
-        }
-
-        if (numberOfPoints == 0)
-        {
-            targetCulture = numberOfCommas is 1 ? Cultures.GermanCulture : Cultures.InvariantCulture;
-            return double.TryParse(text, style, targetCulture, out value);
-        }
-
-        targetCulture = indexOfLastComma > indexOfLastPoint ? Cultures.GermanCulture : Cultures.InvariantCulture;
-        return double.TryParse(text, style, targetCulture, out value);
+        var result = FloatingPointAnalysis.AnalyseText(text.AsSpan());
+        var cultureInfo = result.ChooseCultureInfo();
+        return double.TryParse(text, style, cultureInfo, out value);
     }
 }
