@@ -23,13 +23,13 @@ public class GenericAsyncFactory<T> : IAsyncFactory<T>
     private Func<T> CreateInstance { get; }
 
     /// <summary>
-    /// Creates the specified instance and initializes 
+    /// Creates the specified instance and initializes it asynchronously if it implements <see cref="IInitializeAsync" />.
     /// </summary>
     /// <param name="cancellationToken">The token that can cancel this asynchronous operation (optional).</param>
     public ValueTask<T> CreateAsync(CancellationToken cancellationToken = default)
     {
         var instance = CreateInstance();
-        // ReSharper disable once HeapView.PossibleBoxingAllocation -- we do not care about 
+        // ReSharper disable once HeapView.PossibleBoxingAllocation -- we do not care about boxing here
         if (instance is IInitializeAsync initializeAsync && !initializeAsync.IsInitialized)
             return InitializeInstanceAsync(initializeAsync, cancellationToken);
         return new (instance);
