@@ -23,14 +23,14 @@
         <EmbedUntrackedSources>true</EmbedUntrackedSources>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageReleaseNotes>
-            Synntech.Core 0.1.0
-            --------------------------------
+Synntech.Core 0.1.0
+--------------------------------
         </PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Light.GuardClauses" Version="9.0.0"/>
-        <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" Condition="'$(TargetFramework)' == 'netstandard2.0'"/>
+        <PackageReference Include="Light.GuardClauses" Version="9.0.0" />
+        <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
         <PackageReference Include="IsExternalInit" Version="1.0.1" PrivateAssets="all" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0">
             <PrivateAssets>all</PrivateAssets>
@@ -39,7 +39,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="../../synnotech-logo.png" Pack="true" PackagePath="\"/>
+        <None Include="../../synnotech-logo.png" Pack="true" PackagePath="\" />
     </ItemGroup>
 
 </Project>
