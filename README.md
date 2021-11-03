@@ -42,6 +42,7 @@ Synnotech.Core also offers you the `FloatParser` and the `DecimalParser`. Furthe
 If you have objects that need to be initialized asynchronously (these are usually humble objects that asynchronously open a connection to a third-party system, e.g. a database), you can incorporate the `IInitializeAsync` interface in your code:
 
 ```csharp
+// This interface is part of Synnotech.Core
 public interface IInitializeAsync
 {
     bool IsInitialized { get; }
@@ -53,7 +54,7 @@ public interface IInitializeAsync
 You can implement this interface in your classes, e.g. like this:
 
 ```csharp
-public class LinqToDbDatabaseSession : IInitializeAsync
+public class LinqToDbDatabaseSession : IDatabaseSession, IInitializeAsync
 {
     public LinqToDbDatabaseSession(DataConnection dataConnection) =>
         DataConnection = dataConnection;
@@ -74,3 +75,31 @@ public class LinqToDbDatabaseSession : IInitializeAsync
     // Further members for database access are omitted for brevity's sake
 }
 ```
+
+You can then register the factory and your type with the DI container:
+
+```csharp
+services.AddAsyncFactoryFor<IDatabaseSession, LinqToDbDatabaseSession>();
+```
+
+Internally, the type `GenericAsyncFactory<T>` is used to create and initialize your object. This implemmentation also supports scoped lifetimes for your objects.
+
+To use the `IAsyncFactory<T>`, you can simply inject it:
+
+```csharp
+public class SomeService
+{
+    public SomeService(IAsyncFactory<IDatabaseSession> factory) =>
+        Factory = factory;
+
+    public IAsyncFactory<IDatabaseSession> Factory { get; }
+
+    public async Task DoSomethingAsync()
+    {
+        await using var session = await Factory.CreateAsync();
+        // Do something useful with your session here
+    }
+}
+```
+
+> Be aware: the implementation above is not thread-safe. You might need to synchronize access within InitializeAsync (e.g. with a `SemaphoreSlim`) if `CreateAsync` is called concurrently from multiple threads and the resulting instance should have a scoped lifetime.)
