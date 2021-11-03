@@ -1,0 +1,1 @@
+dotnet pack Synnotech.Core.csproj --configuration Release /p:SignAssembly=true /p:AssemblyOriginatorKeyFile=bin/Synnotech.Core.snk /p:ContinuousIntegrationBuild=true
