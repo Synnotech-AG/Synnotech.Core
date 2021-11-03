@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System;
+using FluentAssertions;
 using Synnotech.Core.Parsing;
 using Xunit;
 
@@ -7,11 +8,16 @@ namespace Synnotech.Core.Tests.Parsing;
 public static class DecimalParserTests
 {
     [Theory]
-    [MemberData(nameof(DecimalPointData))]
+    [MemberData(nameof(NumbersWithDecimalPoint))]
     public static void ParseFloatingPointNumberWithDecimalPoint(string text, decimal expectedValue) =>
         CheckNumber(text, expectedValue);
 
-    public static readonly TheoryData<string, decimal> DecimalPointData =
+    [Theory]
+    [MemberData(nameof(NumbersWithDecimalPoint))]
+    public static void ParseFloatingPointNumberWithDecimalPointAsSpan(string text, decimal expectedValue) =>
+        CheckNumberAsSpan(text, expectedValue);
+
+    public static readonly TheoryData<string, decimal> NumbersWithDecimalPoint =
         new ()
         {
             { "0.74", 0.74m },
@@ -26,6 +32,11 @@ public static class DecimalParserTests
     public static void ParseFloatingPointNumberWithDecimalComma(string text, decimal expectedValue) =>
         CheckNumber(text, expectedValue);
 
+    [Theory]
+    [MemberData(nameof(DecimalCommaData))]
+    public static void ParseFloatingPointNumberWithDecimalCommaAsSpan(string text, decimal expectedValue) =>
+        CheckNumberAsSpan(text, expectedValue);
+
     public static readonly TheoryData<string, decimal> DecimalCommaData =
         new ()
         {
@@ -39,6 +50,11 @@ public static class DecimalParserTests
     [MemberData(nameof(IntegerData))]
     public static void ParseInteger(string text, decimal expectedValue) =>
         CheckNumber(text, expectedValue);
+
+    [Theory]
+    [MemberData(nameof(IntegerData))]
+    public static void ParseIntegerAsSpan(string text, decimal expectedValue) =>
+        CheckNumberAsSpan(text, expectedValue);
 
     public static readonly TheoryData<string, decimal> IntegerData =
         new ()
@@ -57,12 +73,16 @@ public static class DecimalParserTests
         parsedValue.Should().Be(expectedValue);
     }
 
+    private static void CheckNumberAsSpan(ReadOnlySpan<char> text, decimal expectedValue)
+    {
+        var result = DecimalParser.TryParse(text, out var parsedValue);
+
+        result.Should().BeTrue();
+        parsedValue.Should().Be(expectedValue);
+    }
+
     [Theory]
-    [InlineData("Foo")]
-    [InlineData("Bar")]
-    [InlineData("")]
-    [InlineData(null)]
-    [InlineData("9392gk381")]
+    [MemberData(nameof(InvalidNumbers))]
     public static void InvalidNumber(string text)
     {
         var result = DecimalParser.TryParse(text, out var actualValue);
@@ -70,4 +90,24 @@ public static class DecimalParserTests
         result.Should().BeFalse();
         actualValue.Should().Be(default);
     }
+
+    [Theory]
+    [MemberData(nameof(InvalidNumbers))]
+    public static void InvalidNumberAsSpan(string text)
+    {
+        var result = DecimalParser.TryParse(text.AsSpan(), out var actualValue);
+
+        result.Should().BeFalse();
+        actualValue.Should().Be(default);
+    }
+
+    public static readonly TheoryData<string?> InvalidNumbers =
+        new ()
+        {
+            "Foo",
+            "Bar",
+            "",
+            null,
+            "9392gk381",
+        };
 }
