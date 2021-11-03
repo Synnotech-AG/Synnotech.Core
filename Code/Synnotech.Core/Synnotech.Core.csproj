@@ -25,6 +25,12 @@
         <PackageReleaseNotes>
 Synntech.Core 0.1.0
 --------------------------------
+
+- initial release
+- use DoubleParser, FloatParser and DecimalParser to parse text and automatically determine the meaning of points and commas as decimal sign and thousand-delimiter sign
+- use IInitializeAsync and IAsyncFactory&lt;T&gt; to initialize objects asynchronously
+- use ContainerSettings in your AddXXX methods that register types with the DI container
+- read all docs at: https://github.com/Synnotech-AG/Synnotech.Cores
         </PackageReleaseNotes>
     </PropertyGroup>
 

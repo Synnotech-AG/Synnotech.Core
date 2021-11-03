@@ -102,4 +102,38 @@ public class SomeService
 }
 ```
 
-> Be aware: the implementation above is not thread-safe. You might need to synchronize access within InitializeAsync (e.g. with a `SemaphoreSlim`) if `CreateAsync` is called concurrently from multiple threads and the resulting instance should have a scoped lifetime.)
+> Be aware: the implementation above is not thread-safe. You might need to synchronize access within InitializeAsync (e.g. with a `SemaphoreSlim`) if `CreateAsync` is called concurrently from multiple threads and the resulting instance should have a scoped lifetime. We generally recommend to initialize on a single thread and have a dedicated Memory Barrier before `CreateAsync` is called again on another thread (e.g. using an `await` statement).
+
+## Global settings for DI Containers
+
+Synnotech.Core offers a `ContainerSettingsContext` that has a single property called `ContainerSettings`. You can use these settings in your static `AddXXX` (extension) methods that register types with DI containers (usually via the `IServiceCollection` interface). For example, the implementation of `AddAsyncFactoryFor` uses it in the following way:
+
+```csharp
+public static IServiceCollection AddAsyncFactoryFor<TAbstraction, TImplementation>(
+    this IServiceCollection services,
+    ServiceLifetime serviceLifetime = ServiceLifetime.Transient,
+    ServiceLifetime factoryLifetime = ServiceLifetime.Singleton,
+    bool? registerCreateServiceDelegate = null
+)
+    where TAbstraction : class
+    where TImplementation : TAbstraction
+{
+    services.MustNotBeNull(nameof(services));
+
+    services.Add(new ServiceDescriptor(typeof(TAbstraction), typeof(TImplementation), serviceLifetime));
+    services.Add(new ServiceDescriptor(typeof(IAsyncFactory<TAbstraction>), typeof(GenericAsyncFactory<TAbstraction>),factoryLifetime));
+
+    if (ContainerSettingsContext.Settings.CheckIfFactoryDelegateShouldBeRegistered(registerCreateServiceDelegate))
+        services.AddSingleton(container => new Func<TAbstraction>(container.GetRequiredService<TAbstraction>));
+    return services;
+}
+```
+
+In the code example above, the `ContainerSettings` are used to check if a `Func<TAbstraction>` should also be registered with the DI container. Either the caller can specify his intentientions via the optional `registerCreateServiceDelegate` Boolean parameter, or the method will fall back to the default value set on the current instance of `ContainerSettings`. The class also provides a handy `CheckIfFactoryDelegateShouldBeRegistered` method for that.
+
+If you want to change the default container settings, then simply set the property on the ambient context before registering any services to your DI container:
+
+```csharp
+ContainerSettingsContext.Settings = new ContainerSettings(false);
+// Afterwards, you can call AddXXX on services
+```
