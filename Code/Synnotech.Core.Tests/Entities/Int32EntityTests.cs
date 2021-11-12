@@ -69,7 +69,7 @@ public static class Int32EntityTests
 
     [Theory]
     [InlineData(1)]
-    [InlineData(-12)]
+    [InlineData(12)]
     [InlineData(5000)]
     public static void ToStringShouldReturnSimpleTypeNameAndId(int id) =>
         new Entity(id).ToString().Should().Be("Entity " + id);

@@ -1,4 +1,5 @@
 ﻿using System;
+using Light.GuardClauses;
 
 namespace Synnotech.Core.Entities;
 
@@ -15,6 +16,8 @@ namespace Synnotech.Core.Entities;
 public abstract class Int32Entity<T> : IEntity<int>, IEquatable<T>
     where T : Int32Entity<T>
 {
+    private readonly int _id;
+
     /// <summary>
     /// Initializes a new instance of <see cref="Int32Entity{T}" />
     /// </summary>
@@ -24,10 +27,15 @@ public abstract class Int32Entity<T> : IEntity<int>, IEquatable<T>
     /// Initializes a new instance of <see cref="Int32Entity{T}" /> with the specified ID.
     /// </summary>
     /// <param name="id">The ID for the entity.</param>
-    protected Int32Entity(int id) => Id = id;
+    protected Int32Entity(int id) => Id = ValidateId(id, nameof(id));
+
 
     /// <inheritdoc />
-    public int Id { get; init; }
+    public int Id
+    {
+        get => _id;
+        init => _id = ValidateId(value, nameof(value));
+    }
 
     /// <summary>
     /// Checks if the other instance is not null and has the same ID as this instance.
@@ -35,6 +43,15 @@ public abstract class Int32Entity<T> : IEntity<int>, IEquatable<T>
     /// <returns>True when both entities are considered equal, else false.</returns>
     public bool Equals(T? other) =>
         other is not null && Id == other.Id;
+
+    private static int ValidateId(int id, string parameterName)
+    {
+        if (!AllowZero)
+            id.MustNotBe(0, parameterName);
+        if (!AllowNegative)
+            id.MustNotBeLessThan(0, parameterName);
+        return id;
+    }
 
     /// <summary>
     /// Checks if the other instance is of the same entity type and has the same ID as this instance.
@@ -62,6 +79,18 @@ public abstract class Int32Entity<T> : IEntity<int>, IEquatable<T>
     /// Checks if two entities are not equal.
     /// </summary>
     public static bool operator !=(Int32Entity<T>? left, T? right) => !(left?.Equals(right) ?? right is null);
+
+    /// <summary>
+    /// Gets or sets the value indicating whether 0 is a valid ID.
+    /// </summary>
+    // ReSharper disable StaticMemberInGenericType -- this is by design. We want to have different settings for different subtypes
+    public static bool AllowZero { get; set; }
+
+    /// <summary>
+    /// Gets or sets the value indicating whether negative values are valid IDs.
+    /// </summary>
+    public static bool AllowNegative { get; set; }
+    // ReSharper restore StaticMemberInGenericType
 }
 
 /// <summary>
