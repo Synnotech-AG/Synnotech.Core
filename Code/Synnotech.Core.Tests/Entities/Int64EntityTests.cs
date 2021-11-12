@@ -8,27 +8,27 @@ using Xunit;
 
 namespace Synnotech.Core.Tests.Entities;
 
-public static class Int32EntityTests
+public static class Int64EntityTests
 {
     [Fact]
-    public static void MustImplementIEntityOfInt32() =>
-        typeof(Int32Entity<>).Should().Implement<IEntity<int>>();
+    public static void MustImplementIEntityOfInt64() =>
+        typeof(Int64Entity<>).Should().Implement<IEntity<long>>();
 
     [Fact]
     public static void TheSameInstanceShouldBeConsideredEqual()
     {
-        var entity = new Entity(42);
+        var entity = new Entity(42L);
 
         (entity == entity).Should().BeTrue();
         (entity != entity).Should().BeFalse();
-        entity.GetHashCode().Should().Be(entity.Id);
+        entity.GetHashCode().Should().Be(entity.GetHashCode());
     }
 
     [Fact]
     public static void TwoInstancesWithTheSameIdShouldBeEqual()
     {
-        var x = new Entity(80);
-        var y = new Entity(80);
+        var x = new Entity(50_203_040_004L);
+        var y = new Entity(50_203_040_004L);
 
         (x == y).Should().BeTrue();
         (x != y).Should().BeFalse();
@@ -38,8 +38,8 @@ public static class Int32EntityTests
     [Fact]
     public static void TwoInstancesWithDifferentIdsShouldNotBeEqual()
     {
-        var x = new Entity(42);
-        var y = new Entity(80);
+        var x = new Entity(1L);
+        var y = new Entity(2L);
 
         (x == y).Should().BeFalse();
         (x != y).Should().BeTrue();
@@ -49,7 +49,7 @@ public static class Int32EntityTests
     [Fact]
     public static void ComparingWithNullMustReturnFalse()
     {
-        var x = new Entity(1);
+        var x = new Entity(3L);
         var y = default(Entity);
 
         (x == y).Should().BeFalse();
@@ -68,14 +68,14 @@ public static class Int32EntityTests
     }
 
     [Theory]
-    [InlineData(1)]
-    [InlineData(-12)]
-    [InlineData(5000)]
-    public static void ToStringShouldReturnSimpleTypeNameAndId(int id) =>
+    [InlineData(5L)]
+    [InlineData(-359_544L)]
+    [InlineData(10001L)]
+    public static void ToStringShouldReturnSimpleTypeNameAndId(long id) =>
         new Entity(id).ToString().Should().Be("Entity " + id);
 
-    private sealed class Entity : Int32Entity<Entity>
+    private sealed class Entity : Int64Entity<Entity>
     {
-        public Entity(int id) : base(id) { }
+        public Entity(long id) : base(id) { }
     }
 }
