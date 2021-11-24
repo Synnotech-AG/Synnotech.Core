@@ -18,11 +18,160 @@ Synnotech.Core is available as a [NuGet package](https://www.nuget.org/packages/
 
 # What does Synnotech.Core offer you?
 
+## Base classes for Entities
+
+Synnotech.Core offers you the four base classes for entities. These are `Int32Entity`, `Int64Entity`, `GuidEntity`, and `StringEntity`. All of them offer an `Id` property of the corresponding type which is immutable by default. Also, all these classes implement `IEntity<T>` (this interface is part of Synnotech.Core) and `IEquatable<T>` for you (two instances are equal when they have the ID value). These base classes are specifically tailored to be used with Object-Relational Mappers or serialization frameworks.
+
+### Deriving from the base classes
+
+A class that derives from these entities could look like this:
+
+```csharp
+public sealed class Address : Int32Entity
+{
+    // Id property is not needed, it comes with the base class
+    public string Street { get; init; } = string.Empty;
+    public string ZipCode { get; init; } = string.Empty;
+    public string Location { get; init; } = string.Empty;
+}
+```
+
+Your class can then be instantiated like so:
+
+```csharp
+var address = new Address
+{
+    Id = 1,
+    Street = "Herrmann-Köhl-Str 2a",
+    ZipCode = "93049",
+    Location = "Regensburg"
+};
+```
+
+The base classes also offer a parameterized constructor, so you could also make your class immutable via constructor injection (but not many ORMs and serialization frameworks will support that):
+
+```csharp
+public sealed class Address : Int32Entity
+{
+    public Address(int id, string street, string zipCode, string location)
+        : base(id)
+    {
+        Street = street;
+        ZipCode = zipCode;
+        Location = location;
+    }
+
+    public string Street { get; }
+    public string ZipCode { get; }
+    public string Location { get; }
+}
+```
+
+### ID range for Int32Entity and Int64Entity
+
+By default, the `Int32Entity` and `Int64Entity` base classes will only allow IDs that are greater or equal to 1.
+
+```csharp
+// This statement will throw because Int32Entity and Int64Entity
+// only allow positive IDs by default
+var address = new Address { Id = 0 };
+```
+
+You can customize this behavior by using the static `AllowIdZero` and `AllowNegativeIds` properties:
+
+```csharp
+Int32Entity.AllowIdZero = true;
+var address = new Address { Id = 0 };
+```
+
+There is also a handy `AllowZeroAndNegativeIds` method to set both `AllowIdZero` and `AllowNegativeIds` to true with one call.
+
+> BE CAREFUL: all entities that derive from `Int32Entity` are affected by setting the `AllowIdZero` property or the `AllowNegativeIds` property to `true`. If you want to limit these settings to a specific type, you should derive from `Int32Entity<T>`, like so:
+
+```csharp
+public sealed class Address : Int32Entity<Address>
+{
+    // Members omitted for brevity's sake
+}
+```
+
+You can then e.g. only allow zero as a valid ID for addresses:
+
+```csharp
+// other entities are not affected, because they do not derive from Int32Entity<Address>
+Address.AllowIdZero = true; 
+var address = new Address { Id = 0 };
+var contact = new Contact { Id = 0 }; // This would throw
+```
+
+### GuidEntity and empty GUIDs
+
+Similarly to the other types, you can derive from `GuidEntity` or `GuidEntity<T>`:
+
+```csharp
+public sealed class Bill : GuidEntity
+{
+    // Id property is not needed, it comes with the base class
+    public decimal AmountInDollar {get; init; }
+}
+```
+
+By default, `GuidEntity` does not allow empty GUIDs:
+
+```csharp
+// The next statement will throw
+var bill = new Bill { Id = Guid.EmptyGuid };
+```
+
+Similarly to other entity base classes, you can change that by the setting the `AllowEmptyGuid` static property:
+
+```csharp
+GuidEntity.AllowEmptyGuids = true;
+var bill = new Bill { Id = Guid.EmptyGuid }; // This does not throw
+```
+
+As with `AllowIdZero` and `AllowNegativeIds`, the above code would affect all entites deriving from `GuidEntity`. To limit the effect to a single type, you should derive from `GuidEntity<T>`.
+
+### StringEntity, validation, and case-sensitivity
+
+The string entity has the same basic functionality as the other entity base classes. The IDs that are passed to it are validated with the following rules:
+
+- The string must not be null, empty, or contain only white space
+- It must be trimmed, i.e. the first and last character must not be white space
+- It must have a maximum length of 200 characters
+
+You can customize this behavior by supplying a delegate to the static `ValidateId` property. As always, if you want to limit this to one entity type, consider deriving from `StringEntity<T>` (instead of just `StringEntity`).
+
+Furthermore, by default, an entity operates in case-sensitive mode (to be precise: `StringComparison.Ordinal`). You can change this mode by setting the static `ComparisonMode` property to another value of the `StringComparison` enum. As always: if you want to limit this to certain entity types, consider deriving from `StringEntity<T>`.
+
+> BE CAREFUL: you should only change the comparison mode at the beginning of your application (in the composition root) before any of the entities are instatiated. Otherwise subtle bugs can start to occur (e.g. when the ID is already used as a key in a dictionary), because the `Equals` and `GetHashCode` implementation rely on the `ComparisonMode` value.
+
+### Changing the ID of an entity after initialization
+
+By default, all ID properties of the entity base classes are immutable. However, there is a back door that you can use to change the ID after the entity is already fully initialized. The usual scenario where this is necessary is when the ID is created by a database so that the ID is only available after an I/O call:
+
+```csharp
+await using var session = await SessionFactory.OpenSessionAsync();
+var address = new Address
+{
+    Street = "Herrmann-Köhl-Str 2a",
+    ZipCode = "93049",
+    Location = "Regensburg"
+};
+var idOfNewAddress = await session.InsertAsync(address);
+await session.SaveChangesAsync();
+address.ToMutable().SetId(idOfNewAddress); // This will set the ID after initialization
+```
+
+To change the ID after initialization, simply call `entity.ToMutable().SetId(newId)`. `ToMutable` is an extension method which will not polute the public API of your entities.
+
+> BE CAREFUL: you must not change the ID of an entity when it is already supposed to be immutable. This might lead to subtle bugs e.g. when the ID is used as a key in a dictionary.
+
 ## Parsing strings to floating point values
 
 .NET already offers many `TryParse` methods when it comes to parsing text to floating point values, but all of them have the issue that they interpret points and commas in a dedicated way (either as decimal sign or as thousand-delimiter sign, depending on the current or provided `CultureInfo`).
 
-But often (and especially in a German context), commas and points might be mixed up, e.g. when users enter text into a text box, or when some IoT devices send numbers as text in the German, but others send them in the English format.
+But often (and especially in a German context), commas and points might be mixed up, e.g. when users enter text into a text box, or when some IoT devices numbers in the German format, but others in the English format.
 
 You can use the `DoubleParser.TryParse` method which analyses the input string for points and commas and then chooses either the invariant culture or the German culture to parse the string, depending on the number of points and commas and where they are placed. Check out the following code:
 
