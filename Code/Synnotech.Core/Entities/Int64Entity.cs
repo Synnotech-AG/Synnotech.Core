@@ -28,8 +28,8 @@ public abstract class Int64Entity<T> : IEntity<long>, IEquatable<T>, IMutableId<
     /// </summary>
     /// <param name="id">The ID for the entity.</param>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="id" /> is zero and <see cref="AllowZero" /> is false,
-    /// or when <paramref name="id" /> is negative and <see cref="AllowNegative" /> is false.
+    /// Thrown when <paramref name="id" /> is zero and <see cref="AllowIdZero" /> is false,
+    /// or when <paramref name="id" /> is negative and <see cref="AllowNegativeIds" /> is false.
     /// </exception>
     protected Int64Entity(long id) => Id = ValidateId(id, nameof(id));
 
@@ -37,8 +37,8 @@ public abstract class Int64Entity<T> : IEntity<long>, IEquatable<T>, IMutableId<
     /// Gets the ID of this entity, or sets it during initialization.
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="value" /> is zero and <see cref="AllowZero" /> is false,
-    /// or when <paramref name="value" /> is negative and <see cref="AllowNegative" /> is false.
+    /// Thrown when <paramref name="value" /> is zero and <see cref="AllowIdZero" /> is false,
+    /// or when <paramref name="value" /> is negative and <see cref="AllowNegativeIds" /> is false.
     /// </exception>
     public long Id
     {
@@ -55,9 +55,9 @@ public abstract class Int64Entity<T> : IEntity<long>, IEquatable<T>, IMutableId<
 
     private static long ValidateId(long id, string parameterName)
     {
-        if (!AllowZero && id == 0L)
+        if (!AllowIdZero && id == 0L)
             throw new ArgumentOutOfRangeException(parameterName, $"{parameterName} must not be 0.");
-        if (!AllowNegative)
+        if (!AllowNegativeIds)
             id.MustNotBeLessThan(0L, parameterName);
         return id;
     }
@@ -93,18 +93,18 @@ public abstract class Int64Entity<T> : IEntity<long>, IEquatable<T>, IMutableId<
     /// Gets or sets the value indicating whether 0 is a valid ID.
     /// </summary>
     // ReSharper disable StaticMemberInGenericType -- this is by design. We want to have different settings for different subtypes
-    public static bool AllowZero { get; set; }
+    public static bool AllowIdZero { get; set; }
 
     /// <summary>
     /// Gets or sets the value indicating whether negative values are valid IDs.
     /// </summary>
-    public static bool AllowNegative { get; set; }
+    public static bool AllowNegativeIds { get; set; }
     // ReSharper restore StaticMemberInGenericType
 
     /// <summary>
-    /// Sets <see cref="AllowZero" /> and <see cref="AllowNegative" /> to true.
+    /// Sets <see cref="AllowIdZero" /> and <see cref="AllowNegativeIds" /> to true.
     /// </summary>
-    public static void AllowZeroAndNegativeIds() => AllowZero = AllowNegative = true;
+    public static void AllowZeroAndNegativeIds() => AllowIdZero = AllowNegativeIds = true;
 
     /// <summary>
     /// <para>
@@ -122,8 +122,8 @@ public abstract class Int64Entity<T> : IEntity<long>, IEquatable<T>, IMutableId<
     /// </summary>
     /// <param name="id">The new ID for the entity.</param>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="id" /> is zero and <see cref="AllowZero" /> is false,
-    /// or when <paramref name="id" /> is negative and <see cref="AllowNegative" /> is false.
+    /// Thrown when <paramref name="id" /> is zero and <see cref="AllowIdZero" /> is false,
+    /// or when <paramref name="id" /> is negative and <see cref="AllowNegativeIds" /> is false.
     /// </exception>
     void IMutableId<long>.SetId(long id) => _id = ValidateId(id, nameof(id));
 }

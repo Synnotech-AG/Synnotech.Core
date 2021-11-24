@@ -105,13 +105,13 @@ public sealed class Int64EntityTests
     {
         try
         {
-            Entity.AllowNegative = true;
+            Entity.AllowNegativeIds = true;
             var entity = new Entity(negativeId);
             entity.Id.Should().Be(negativeId);
         }
         finally
         {
-            Entity.AllowNegative = false;
+            Entity.AllowNegativeIds = false;
         }
     }
 
@@ -121,13 +121,13 @@ public sealed class Int64EntityTests
     {
         try
         {
-            Entity.AllowNegative = true;
+            Entity.AllowNegativeIds = true;
             var entity = new Entity { Id = negativeId };
             entity.Id.Should().Be(negativeId);
         }
         finally
         {
-            Entity.AllowNegative = false;
+            Entity.AllowNegativeIds = false;
         }
     }
 
@@ -152,13 +152,13 @@ public sealed class Int64EntityTests
     {
         try
         {
-            Entity.AllowZero = true;
+            Entity.AllowIdZero = true;
             var entity = new Entity(0L);
             entity.Id.Should().Be(0L);
         }
         finally
         {
-            Entity.AllowZero = false;
+            Entity.AllowIdZero = false;
         }
     }
 
@@ -167,13 +167,13 @@ public sealed class Int64EntityTests
     {
         try
         {
-            Entity.AllowZero = true;
+            Entity.AllowIdZero = true;
             var entity = new Entity { Id = 0L };
             entity.Id.Should().Be(0L);
         }
         finally
         {
-            Entity.AllowZero = false;
+            Entity.AllowIdZero = false;
         }
     }
 
@@ -183,13 +183,13 @@ public sealed class Int64EntityTests
         try
         {
             Entity.AllowZeroAndNegativeIds();
-            Entity.AllowZero.Should().BeTrue();
-            Entity.AllowNegative.Should().BeTrue();
+            Entity.AllowIdZero.Should().BeTrue();
+            Entity.AllowNegativeIds.Should().BeTrue();
         }
         finally
         {
-            Entity.AllowNegative = false;
-            Entity.AllowZero = false;
+            Entity.AllowNegativeIds = false;
+            Entity.AllowIdZero = false;
         }
     }
 
@@ -225,14 +225,14 @@ public sealed class Int64EntityTests
     {
         try
         {
-            Entity.AllowZero = true;
+            Entity.AllowIdZero = true;
             var entity = new Entity();
             entity.ToMutable().SetId(0L);
             entity.Id.Should().Be(0L);
         }
         finally
         {
-            Entity.AllowZero = false;
+            Entity.AllowIdZero = false;
         }
     }
 
@@ -242,14 +242,14 @@ public sealed class Int64EntityTests
     {
         try
         {
-            Entity.AllowNegative = true;
+            Entity.AllowNegativeIds = true;
             var entity = new Entity();
             entity.ToMutable().SetId(negativeId);
             entity.Id.Should().Be(negativeId);
         }
         finally
         {
-            Entity.AllowNegative = false;
+            Entity.AllowNegativeIds = false;
         }
     }
 
