@@ -14,10 +14,10 @@ namespace Synnotech.Core.Entities;
 /// Your type that derives from this class. This generic parameter is used for
 /// the <see cref="IEquatable{T}" /> implementation.
 /// </typeparam>
-public abstract class GuidEntity<T> : IEntity<Guid>, IEquatable<T>
+public abstract class GuidEntity<T> : IEntity<Guid>, IEquatable<T>, IMutableId<Guid>
     where T : GuidEntity<T>
 {
-    private readonly Guid _id;
+    private Guid _id;
 
     /// <summary>
     /// Initializes a new instance of <see cref="GuidEntity{T}" />.
@@ -32,12 +32,7 @@ public abstract class GuidEntity<T> : IEntity<Guid>, IEquatable<T>
     /// Thrown when <paramref name="id" /> is an empty GUID and <see cref="AllowEmptyGuid" />
     /// is set to false (which is the default value).
     /// </exception>
-    protected GuidEntity(Guid id)
-    {
-        if (!AllowEmptyGuid)
-            id.MustNotBeEmpty(nameof(id));
-        _id = id;
-    }
+    protected GuidEntity(Guid id) => _id = ValidateId(id, nameof(id));
 
     /// <summary>
     /// Gets or sets the value indicating whether empty GUIDs can be set on this entity type.
@@ -47,16 +42,24 @@ public abstract class GuidEntity<T> : IEntity<Guid>, IEquatable<T>
     // ReSharper disable once StaticMemberInGenericType -- I actually want this static field present for each generic type
     public static bool AllowEmptyGuid { get; set; }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Gets the ID of this entity, or sets it during initialization.
+    /// </summary>
+    /// <exception cref="EmptyGuidException">
+    /// Thrown when <paramref name="value" /> is an empty GUID and <see cref="AllowEmptyGuid" />
+    /// is set to false (which is the default value).
+    /// </exception>
     public Guid Id
     {
         get => _id;
-        init
-        {
-            if (!AllowEmptyGuid)
-                value.MustNotBeEmpty();
-            _id = value;
-        }
+        init => _id = ValidateId(value, nameof(value));
+    }
+
+    private static Guid ValidateId(Guid id, string parameterName)
+    {
+        if (!AllowEmptyGuid)
+            id.MustNotBeEmpty(parameterName);
+        return id;
     }
 
     /// <summary>
@@ -92,6 +95,27 @@ public abstract class GuidEntity<T> : IEntity<Guid>, IEquatable<T>
     /// Checks if two entities are not equal.
     /// </summary>
     public static bool operator !=(GuidEntity<T>? left, T? right) => !(left?.Equals(right) ?? right is null);
+
+    /// <summary>
+    /// <para>
+    /// Sets the Id after the entity is already initialized.
+    /// </para>
+    /// <para>
+    /// BE CAREFUL: you must not call this method when the ID of your Entity should already be immutable.
+    /// This is e.g. the case when the ID is used as a key within a dictionary.
+    /// </para>
+    /// <para>
+    /// However, when inserting an entity into a database, the database will usually generate the ID
+    /// of the entity at this point in time. Updating the ID after the insert is complete is OK and
+    /// is the usual scenario where this method should be called.
+    /// </para>
+    /// </summary>
+    /// <param name="id">The new ID for the entity.</param>
+    /// <exception cref="EmptyGuidException">
+    /// Thrown when <paramref name="id" /> is an empty GUID and <see cref="AllowEmptyGuid" />
+    /// is set to false (which is the default value).
+    /// </exception>
+    void IMutableId<Guid>.SetId(Guid id) => _id = ValidateId(id, nameof(id));
 }
 
 /// <summary>

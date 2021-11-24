@@ -70,14 +70,10 @@ public static class GuidEntityTests
         (@null != @null).Should().BeFalse();
     }
 
-    // I need to test some constructors without ever needing the created instance
-    // ReSharper disable ObjectCreationAsStatement
-#pragma warning disable CA1806 // Do not ignore method results
-
     [Fact]
     public static void EmptyGuidShouldThrowByDefaultViaConstructor()
     {
-        Action act = () => new Entity(Guid.Empty);
+        Action act = () => _ = new Entity(Guid.Empty);
 
         act.Should().Throw<EmptyGuidException>()
            .And.ParamName.Should().Be("id");
@@ -86,7 +82,7 @@ public static class GuidEntityTests
     [Fact]
     public static void EmptyGuidShouldThrowByDefaultViaPropertyInitialization()
     {
-        Action act = () => new Entity { Id = Guid.Empty };
+        Action act = () => _ = new Entity { Id = Guid.Empty };
 
         act.Should().Throw<EmptyGuidException>();
     }
@@ -95,21 +91,33 @@ public static class GuidEntityTests
     [Fact]
     public static void AllowEmptyGuidViaConstructor()
     {
-        Entity.AllowEmptyGuid = true;
+        try
+        {
+            Entity.AllowEmptyGuid = true;
 
-        new Entity(Guid.Empty);
+            var entity = new Entity(Guid.Empty);
+            entity.Id.Should().BeEmpty();
 
-        Entity.AllowEmptyGuid = false;
+        }
+        finally
+        {
+            Entity.AllowEmptyGuid = false;
+        }
     }
 
     [Fact]
     public static void AllowEmptyGuidViaPropertyInitialization()
     {
-        Entity.AllowEmptyGuid = true;
-
-        new Entity { Id = Guid.Empty };
-
-        Entity.AllowEmptyGuid = false;
+        try
+        {
+            Entity.AllowEmptyGuid = true;
+            var entity = new Entity { Id = Guid.Empty };
+            entity.Id.Should().BeEmpty();
+        }
+        finally
+        {
+            Entity.AllowEmptyGuid = false;
+        }
     }
 
     // ReSharper restore ObjectCreationAsStatement
@@ -123,6 +131,40 @@ public static class GuidEntityTests
     {
         var guid = Guid.Parse(guidText);
         new Entity(guid).ToString().Should().Be("Entity " + guid);
+    }
+
+    [Fact]
+    public static void SetIdAfterInitialization()
+    {
+        var guid = Guid.NewGuid();
+        var entity = new Entity();
+        entity.ToMutable().SetId(guid);
+        entity.Id.Should().Be(guid);
+    }
+
+    [Fact]
+    public static void SetIdAfterInitializationShouldThrowWhenGuidIsEmpty()
+    {
+        var action = () => new Entity().ToMutable().SetId(Guid.Empty);
+
+        action.Should().Throw<EmptyGuidException>()
+              .And.ParamName.Should().Be("id");
+    }
+
+    [Fact]
+    public static void AllowEmptyGuidOnSetIdAfterInitialization()
+    {
+        try
+        {
+            Entity.AllowEmptyGuid = true;
+            var entity = new Entity();
+            entity.ToMutable().SetId(Guid.Empty);
+            entity.Id.Should().BeEmpty();
+        }
+        finally
+        {
+            Entity.AllowEmptyGuid = false;
+        }
     }
 
     private sealed class Entity : GuidEntity<Entity>
