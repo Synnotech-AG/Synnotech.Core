@@ -20,7 +20,7 @@ Synnotech.Core is available as a [NuGet package](https://www.nuget.org/packages/
 
 ## Base classes for Entities
 
-Synnotech.Core offers you the four base classes for entities. These are `Int32Entity`, `Int64Entity`, `GuidEntity`, and `StringEntity`. All of them offer an `Id` property of the corresponding type which is immutable by default. Also, all these classes implement `IEntity<T>` (this interface is part of Synnotech.Core) and `IEquatable<T>` for you (two instances are equal when they have the ID value). These base classes are specifically tailored to be used with Object-Relational Mappers or serialization frameworks.
+Synnotech.Core offers you four base classes for entities. These are `Int32Entity`, `Int64Entity`, `GuidEntity`, and `StringEntity`. All of them offer an `Id` property of the corresponding type which is immutable by default. Also, all these classes implement `IEntity<T>` (this interface is part of Synnotech.Core) and `IEquatable<T>` for you (two instances are equal when they have the ID value). These base classes are specifically tailored to be used with Object-Relational Mappers or serialization frameworks.
 
 ### Deriving from the base classes
 
