@@ -1,6 +1,9 @@
-﻿using FluentAssertions;
+﻿using System;
+using FluentAssertions;
 using Synnotech.Core.Entities;
+using Synnotech.Xunit;
 using Xunit;
+using Xunit.Abstractions;
 
 // I will need to compare sometimes variables to themselves in these tests
 // ReSharper disable EqualExpressionComparison
@@ -8,8 +11,12 @@ using Xunit;
 
 namespace Synnotech.Core.Tests.Entities;
 
-public static class Int64EntityTests
+public sealed class Int64EntityTests
 {
+    public Int64EntityTests(ITestOutputHelper output) => Output = output;
+
+    private ITestOutputHelper Output { get; }
+
     [Fact]
     public static void MustImplementIEntityOfInt64() =>
         typeof(Int64Entity<>).Should().Implement<IEntity<long>>();
@@ -69,13 +76,201 @@ public static class Int64EntityTests
 
     [Theory]
     [InlineData(5L)]
-    [InlineData(-359_544L)]
+    [InlineData(359_544L)]
     [InlineData(10001L)]
     public static void ToStringShouldReturnSimpleTypeNameAndId(long id) =>
         new Entity(id).ToString().Should().Be("Entity " + id);
 
+    [Theory]
+    [MemberData(nameof(NegativeIds))]
+    public void ConstructorShouldThrowWhenPassingNegativeId(long negativeId)
+    {
+        void Act() => _ = new Entity(negativeId);
+
+        ExpectArgumentOutOfRangeException(Act);
+    }
+
+    [Theory]
+    [MemberData(nameof(NegativeIds))]
+    public void PropertyInitializerShouldThrowWhenPassingNegativeId(long negativeId)
+    {
+        void Act() => _ = new Entity { Id = negativeId };
+
+        ExpectArgumentOutOfRangeException(Act, "value");
+    }
+
+    [Theory]
+    [MemberData(nameof(NegativeIds))]
+    public static void AllowNegativeIdViaConstructor(long negativeId)
+    {
+        try
+        {
+            Entity.AllowNegative = true;
+            var entity = new Entity(negativeId);
+            entity.Id.Should().Be(negativeId);
+        }
+        finally
+        {
+            Entity.AllowNegative = false;
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(NegativeIds))]
+    public static void AllowNegativeIdViaPropertyInitializer(long negativeId)
+    {
+        try
+        {
+            Entity.AllowNegative = true;
+            var entity = new Entity { Id = negativeId };
+            entity.Id.Should().Be(negativeId);
+        }
+        finally
+        {
+            Entity.AllowNegative = false;
+        }
+    }
+
+    [Fact]
+    public void ConstructorShouldThrowWhenZeroIsPassed()
+    {
+        void Act() => _ = new Entity(0L);
+
+        ExpectArgumentOutOfRangeException(Act);
+    }
+
+    [Fact]
+    public void PropertyInitializerShouldThrowWhenZeroIsPassed()
+    {
+        void Act() => _ = new Entity { Id = 0L };
+
+        ExpectArgumentOutOfRangeException(Act, "value");
+    }
+
+    [Fact]
+    public static void AllowZeroIdViaConstructor()
+    {
+        try
+        {
+            Entity.AllowZero = true;
+            var entity = new Entity(0L);
+            entity.Id.Should().Be(0L);
+        }
+        finally
+        {
+            Entity.AllowZero = false;
+        }
+    }
+
+    [Fact]
+    public static void AllowZeroViaPropertyInitialization()
+    {
+        try
+        {
+            Entity.AllowZero = true;
+            var entity = new Entity { Id = 0L };
+            entity.Id.Should().Be(0L);
+        }
+        finally
+        {
+            Entity.AllowZero = false;
+        }
+    }
+
+    [Fact]
+    public static void SetAllowZeroAndAllowNegativeInOneCall()
+    {
+        try
+        {
+            Entity.AllowZeroAndNegativeIds();
+            Entity.AllowZero.Should().BeTrue();
+            Entity.AllowNegative.Should().BeTrue();
+        }
+        finally
+        {
+            Entity.AllowNegative = false;
+            Entity.AllowZero = false;
+        }
+    }
+
+    [Fact]
+    public static void SetIdAfterInitialization()
+    {
+        var entity = new Entity();
+
+        entity.ToMutable().SetId(42L);
+
+        entity.Id.Should().Be(42L);
+    }
+
+    [Fact]
+    public void SetIdAfterInitializationShouldThrowWhenIdIsZero()
+    {
+        void Act() => new Entity().ToMutable().SetId(0L);
+
+        ExpectArgumentOutOfRangeException(Act);
+    }
+
+    [Theory]
+    [MemberData(nameof(NegativeIds))]
+    public void SetIdAfterInitializationShouldThrowWhenIdIsNegative(long negativeId)
+    {
+        void Act() => new Entity().ToMutable().SetId(negativeId);
+
+        ExpectArgumentOutOfRangeException(Act);
+    }
+
+    [Fact]
+    public static void AllowZeroOnSetIdAfterInitialization()
+    {
+        try
+        {
+            Entity.AllowZero = true;
+            var entity = new Entity();
+            entity.ToMutable().SetId(0L);
+            entity.Id.Should().Be(0L);
+        }
+        finally
+        {
+            Entity.AllowZero = false;
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(NegativeIds))]
+    public static void AllowNegativeIdsOnSetIdAfterInitialization(long negativeId)
+    {
+        try
+        {
+            Entity.AllowNegative = true;
+            var entity = new Entity();
+            entity.ToMutable().SetId(negativeId);
+            entity.Id.Should().Be(negativeId);
+        }
+        finally
+        {
+            Entity.AllowNegative = false;
+        }
+    }
+
+    private void ExpectArgumentOutOfRangeException(Action act, string parameterName = "id")
+    {
+        var exception = act.Should().Throw<ArgumentOutOfRangeException>().Which;
+        exception.ShouldBeWrittenTo(Output);
+        exception.ParamName.Should().Be(parameterName);
+    }
+
+    public static TheoryData<long> NegativeIds { get; } =
+        new()
+        {
+            -1L,
+            -58192923421L,
+            long.MinValue
+        };
+
     private sealed class Entity : Int64Entity<Entity>
     {
+        public Entity() { }
         public Entity(long id) : base(id) { }
     }
 }
