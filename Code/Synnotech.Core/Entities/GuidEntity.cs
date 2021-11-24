@@ -55,19 +55,40 @@ public abstract class GuidEntity<T> : IEntity<Guid>, IEquatable<T>, IMutableId<G
         init => _id = ValidateId(value, nameof(value));
     }
 
-    private static Guid ValidateId(Guid id, string parameterName)
-    {
-        if (!AllowEmptyGuid)
-            id.MustNotBeEmpty(parameterName);
-        return id;
-    }
-
     /// <summary>
     /// Checks if the other instance is not null and has the same ID as this instance.
     /// </summary>
     /// <returns>True when both entities are considered equal, else false.</returns>
     public bool Equals(T? other) =>
         other is not null && Id == other.Id;
+
+    /// <summary>
+    /// <para>
+    /// Sets the Id after the entity is already initialized.
+    /// </para>
+    /// <para>
+    /// BE CAREFUL: you must not call this method when the ID of your Entity should already be immutable.
+    /// This is e.g. the case when the ID is used as a key within a dictionary.
+    /// </para>
+    /// <para>
+    /// However, when inserting an entity into a database, the database will usually generate the ID
+    /// of the entity at this point in time. Updating the ID after the insert is complete is OK and
+    /// is the usual scenario where this method should be called.
+    /// </para>
+    /// </summary>
+    /// <param name="id">The new ID for the entity.</param>
+    /// <exception cref="EmptyGuidException">
+    /// Thrown when <paramref name="id" /> is an empty GUID and <see cref="AllowEmptyGuid" />
+    /// is set to false (which is the default value).
+    /// </exception>
+    void IMutableId<Guid>.SetId(Guid id) => _id = ValidateId(id, nameof(id));
+
+    private static Guid ValidateId(Guid id, string parameterName)
+    {
+        if (!AllowEmptyGuid)
+            id.MustNotBeEmpty(parameterName);
+        return id;
+    }
 
     /// <summary>
     /// Checks if the other instance is of the same entity type and has the same ID as this instance.
@@ -95,27 +116,6 @@ public abstract class GuidEntity<T> : IEntity<Guid>, IEquatable<T>, IMutableId<G
     /// Checks if two entities are not equal.
     /// </summary>
     public static bool operator !=(GuidEntity<T>? left, T? right) => !(left?.Equals(right) ?? right is null);
-
-    /// <summary>
-    /// <para>
-    /// Sets the Id after the entity is already initialized.
-    /// </para>
-    /// <para>
-    /// BE CAREFUL: you must not call this method when the ID of your Entity should already be immutable.
-    /// This is e.g. the case when the ID is used as a key within a dictionary.
-    /// </para>
-    /// <para>
-    /// However, when inserting an entity into a database, the database will usually generate the ID
-    /// of the entity at this point in time. Updating the ID after the insert is complete is OK and
-    /// is the usual scenario where this method should be called.
-    /// </para>
-    /// </summary>
-    /// <param name="id">The new ID for the entity.</param>
-    /// <exception cref="EmptyGuidException">
-    /// Thrown when <paramref name="id" /> is an empty GUID and <see cref="AllowEmptyGuid" />
-    /// is set to false (which is the default value).
-    /// </exception>
-    void IMutableId<Guid>.SetId(Guid id) => _id = ValidateId(id, nameof(id));
 }
 
 /// <summary>

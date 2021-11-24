@@ -46,6 +46,13 @@ public abstract class Int32Entity<T> : IEntity<int>, IEquatable<T>, IMutableId<i
         init => _id = ValidateId(value, nameof(value));
     }
 
+    /// <summary>
+    /// Checks if the other instance is not null and has the same ID as this instance.
+    /// </summary>
+    /// <returns>True when both entities are considered equal, else false.</returns>
+    public bool Equals(T? other) =>
+        other is not null && Id == other.Id;
+
     private static int ValidateId(int id, string parameterName)
     {
         if (!AllowZero && id == 0)
@@ -54,13 +61,6 @@ public abstract class Int32Entity<T> : IEntity<int>, IEquatable<T>, IMutableId<i
             id.MustNotBeLessThan(0, parameterName);
         return id;
     }
-
-    /// <summary>
-    /// Checks if the other instance is not null and has the same ID as this instance.
-    /// </summary>
-    /// <returns>True when both entities are considered equal, else false.</returns>
-    public bool Equals(T? other) =>
-        other is not null && Id == other.Id;
 
     /// <summary>
     /// Checks if the other instance is of the same entity type and has the same ID as this instance.

@@ -49,8 +49,4 @@ Synntech.Core 0.1.0
         <None Include="../../synnotech-logo.png" Pack="true" PackagePath="\" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Entities\" />
-    </ItemGroup>
-
 </Project>
