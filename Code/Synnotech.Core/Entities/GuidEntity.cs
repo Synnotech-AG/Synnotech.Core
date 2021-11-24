@@ -98,7 +98,7 @@ public abstract class GuidEntity<T> : IEntity<Guid>, IEquatable<T>, IMutableId<G
         @object is T entity && Equals(entity);
 
     /// <summary>
-    /// Returns the Id of the entity.
+    /// Returns the hashcode of the ID.
     /// </summary>
     public override int GetHashCode() => Id.GetHashCode();
 
@@ -119,7 +119,7 @@ public abstract class GuidEntity<T> : IEntity<Guid>, IEquatable<T>, IMutableId<G
 }
 
 /// <summary>
-/// Represents a specialized base class for entities that have an <see cref="Guid" /> ID.
+/// Represents a specialized base class for entities that have a <see cref="Guid" /> ID.
 /// Consider deriving from <see cref="GuidEntity{T}" /> if you want to limit which
 /// entities can be compared with each other.
 /// </summary>

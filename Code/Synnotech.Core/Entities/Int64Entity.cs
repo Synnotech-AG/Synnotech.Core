@@ -27,9 +27,19 @@ public abstract class Int64Entity<T> : IEntity<long>, IEquatable<T>, IMutableId<
     /// Initializes a new instance of <see cref="Int64Entity{T}" /> with the specified ID.
     /// </summary>
     /// <param name="id">The ID for the entity.</param>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown when <paramref name="id" /> is zero and <see cref="AllowZero" /> is false,
+    /// or when <paramref name="id" /> is negative and <see cref="AllowNegative" /> is false.
+    /// </exception>
     protected Int64Entity(long id) => Id = ValidateId(id, nameof(id));
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Gets the ID of this entity, or sets it during initialization.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown when <paramref name="value" /> is zero and <see cref="AllowZero" /> is false,
+    /// or when <paramref name="value" /> is negative and <see cref="AllowNegative" /> is false.
+    /// </exception>
     public long Id
     {
         get => _id;
@@ -60,7 +70,7 @@ public abstract class Int64Entity<T> : IEntity<long>, IEquatable<T>, IMutableId<
         @object is T entity && Equals(entity);
 
     /// <summary>
-    /// Returns the Id of the entity.
+    /// Returns the hashcode of the ID.
     /// </summary>
     public override int GetHashCode() => Id.GetHashCode();
 
@@ -119,7 +129,7 @@ public abstract class Int64Entity<T> : IEntity<long>, IEquatable<T>, IMutableId<
 }
 
 /// <summary>
-/// Represents a specialized base class for entities that have an <see cref="long" /> ID.
+/// Represents a specialized base class for entities that have a <see cref="long" /> ID.
 /// Consider deriving from <see cref="Int64Entity{T}" /> if you want to limit which
 /// entities can be compared with each other.
 /// </summary>

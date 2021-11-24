@@ -4,7 +4,7 @@ using Light.GuardClauses;
 namespace Synnotech.Core.Entities;
 
 /// <summary>
-/// Represents the base class for entities that have an <see cref="int" /> ID.
+/// Represents the base class for entities that have a <see cref="int" /> ID.
 /// This class implements <see cref="IEquatable{T}" /> so that two instances with
 /// the same ID are considered equal. If you want to check for reference equality,
 /// you must explicitly call <see cref="object.ReferenceEquals" />.
@@ -34,7 +34,7 @@ public abstract class Int32Entity<T> : IEntity<int>, IEquatable<T>, IMutableId<i
     protected Int32Entity(int id) => Id = ValidateId(id, nameof(id));
 
     /// <summary>
-    /// Gets the ID of the entity or sets it on initialization.
+    /// Gets the ID of the entity, or sets it during initialization.
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">
     /// Thrown when <paramref name="value" /> is zero and <see cref="AllowZero" /> is false,
@@ -129,7 +129,7 @@ public abstract class Int32Entity<T> : IEntity<int>, IEquatable<T>, IMutableId<i
 }
 
 /// <summary>
-/// Represents a specialized base class for entities that have an <see cref="int" /> ID.
+/// Represents a specialized base class for entities that have a <see cref="int" /> ID.
 /// Consider deriving from <see cref="Int32Entity{T}" /> if you want to limit which
 /// entities can be compared with each other.
 /// </summary>
