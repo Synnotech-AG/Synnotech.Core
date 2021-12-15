@@ -8,7 +8,7 @@
         <Authors>Synnotech AG</Authors>
         <Company>Synnotech AG</Company>
         <Copyright>Copyright © Synnotech AG 2021</Copyright>
-        <Version>0.1.0</Version>
+        <Version>0.2.0</Version>
         <Description>Provides general abstractions, algorithms, and data structures for .NET</Description>
         <TreatWarningsAsErrors Condition="'$(Configuration)' == 'Release'">true</TreatWarningsAsErrors>
         <IsPackable>true</IsPackable>
@@ -23,26 +23,20 @@
         <EmbedUntrackedSources>true</EmbedUntrackedSources>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageReleaseNotes>
-Synntech.Core 0.1.0
+Synntech.Core 0.2.0
 --------------------------------
 
-- initial release
-- use DoubleParser, FloatParser and DecimalParser to parse text and automatically determine the meaning of points and commas as decimal sign and thousand-delimiter sign
-- use IInitializeAsync and IAsyncFactory&lt;T&gt; to initialize objects asynchronously
-- use ContainerSettings in your AddXXX methods that register types with the DI container
+- added base classes for entities
 - read all docs at: https://github.com/Synnotech-AG/Synnotech.Cores
         </PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Light.GuardClauses" Version="9.0.0" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
+        <PackageReference Include="Light.GuardClauses" Version="10.0.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
         <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
         <PackageReference Include="IsExternalInit" Version="1.0.1" PrivateAssets="all" />
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-        </PackageReference>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="all" />
     </ItemGroup>
 
     <ItemGroup>
