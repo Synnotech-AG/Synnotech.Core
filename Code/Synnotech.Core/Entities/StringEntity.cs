@@ -25,7 +25,7 @@ public abstract class StringEntity<T> : IEntity<string>, IEquatable<T>, IMutable
     public delegate string ValidateIdDelegate(string id, string parameterName);
 
     private static ValidateIdDelegate _validateId = ValidateTrimmedNotWhiteSpaceShorterThanOrEqualTo200;
-    private string _id = string.Empty;
+    private string? _id = IsDefaultValueNull ? null : string.Empty;
 
     /// <summary>
     /// Initializes a new instance of <see cref="StringEntity{T}" />
@@ -35,7 +35,7 @@ public abstract class StringEntity<T> : IEntity<string>, IEquatable<T>, IMutable
     /// <summary>
     /// Initializes a new instance of <see cref="StringEntity{T}" /> with the specified ID.
     /// </summary>
-    /// <param name="id">The ID of the entity</param>
+    /// <param name="id">The ID of the entity.</param>
     /// <exception cref="ArgumentException">
     /// Thrown when <paramref name="id" /> is invalid. By default, the
     /// id is checked for null, being empty, containing only white space,
@@ -63,6 +63,13 @@ public abstract class StringEntity<T> : IEntity<string>, IEquatable<T>, IMutable
     }
 
     /// <summary>
+    /// Gets or sets the value indicating whether the default value for <see cref="Id"/> is null.
+    /// This defaults to true. If you set this value to false, <see cref="Id"/> will be set
+    /// to <see cref="string.Empty" />.
+    /// </summary>
+    public static bool IsDefaultValueNull { get; set; } = true;
+
+    /// <summary>
     /// <para>
     /// Gets or sets the mode for ID comparisons. The default is <see cref="StringComparison.Ordinal" />.
     /// </para>
@@ -80,7 +87,7 @@ public abstract class StringEntity<T> : IEntity<string>, IEquatable<T>, IMutable
     /// </summary>
     public string Id
     {
-        get => _id;
+        get => _id!;
         init => _id = ValidateId(value, nameof(value));
     }
 
@@ -142,6 +149,10 @@ public abstract class StringEntity<T> : IEntity<string>, IEquatable<T>, IMutable
     /// </summary>
     public override int GetHashCode()
     {
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+        if (Id is null)
+            return 0;
+        
         // ReSharper disable once NonReadonlyMemberInGetHashCode -- this must be handled properly by the caller.
         var comparisonMode = ComparisonMode;
         return comparisonMode switch

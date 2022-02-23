@@ -38,6 +38,29 @@ public static class StringEntityTests
     }
 
     [Fact]
+    public static void DefaultValueIsNull()
+    {
+        var entity = new Entity();
+
+        entity.Id.Should().BeNull();
+    }
+
+    [Fact]
+    public static void DefaultValueCanBeSetToEmptyString()
+    {
+        try
+        {
+            Entity.IsDefaultValueNull = false;
+            var entity = new Entity();
+            entity.Id.Should().BeEmpty();
+        }
+        finally
+        {
+            Entity.IsDefaultValueNull = true;
+        }
+    }
+
+    [Fact]
     public static void TwoInstancesWIthDifferentIdsShouldNotBeEqual()
     {
         var x = new Entity("Foo");
