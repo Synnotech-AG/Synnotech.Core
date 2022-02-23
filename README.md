@@ -146,6 +146,8 @@ Furthermore, by default, an entity operates in case-sensitive mode (to be precis
 
 > BE CAREFUL: you should only change the comparison mode at the beginning of your application (in the composition root) before any of the entities are instatiated. Otherwise subtle bugs can start to occur (e.g. when the ID is already used as a key in a dictionary), because the `Equals` and `GetHashCode` implementation rely on the `ComparisonMode` value.
 
+The default value for `Id` for a string entity is `null`. You can change this behavior by using the static `IsDefaultValueNull` property whose default value is `true`.
+
 ### Changing the ID of an entity after initialization
 
 By default, all ID properties of the entity base classes are immutable. However, there is a back door that you can use to change the ID after the entity is already fully initialized. The usual scenario where this is necessary is when the ID is created by a database so that the ID is only available after an I/O call:
