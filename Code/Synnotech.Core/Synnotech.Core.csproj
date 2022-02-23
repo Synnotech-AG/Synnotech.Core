@@ -8,7 +8,7 @@
         <Authors>Synnotech AG</Authors>
         <Company>Synnotech AG</Company>
         <Copyright>Copyright © Synnotech AG 2021</Copyright>
-        <Version>0.2.0</Version>
+        <Version>0.3.0</Version>
         <Description>Provides general abstractions, algorithms, and data structures for .NET</Description>
         <TreatWarningsAsErrors Condition="'$(Configuration)' == 'Release'">true</TreatWarningsAsErrors>
         <IsPackable>true</IsPackable>
@@ -23,10 +23,10 @@
         <EmbedUntrackedSources>true</EmbedUntrackedSources>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageReleaseNotes>
-Synntech.Core 0.2.0
+Synntech.Core 0.3.0
 --------------------------------
 
-- added base classes for entities
+- breaking change: StringEntity&lt;T&gt;.Id's default value is now null. Use IsDefaultValueNull to control this behavior.
 - read all docs at: https://github.com/Synnotech-AG/Synnotech.Cores
         </PackageReleaseNotes>
     </PropertyGroup>
