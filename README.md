@@ -12,7 +12,7 @@ Synnotech.Core is compiled against [.NET Standard 2.0 and 2.1](https://docs.micr
 
 Synnotech.Core is available as a [NuGet package](https://www.nuget.org/packages/Synnotech.Core/) and can be installed via:
 
-- **Package Reference in csproj**: `<PackageReference Include="Synnotech.Core" Version="0.3.0" />`S
+- **Package Reference in csproj**: `<PackageReference Include="Synnotech.Core" Version="0.3.0" />`
 - **dotnet CLI**: `dotnet add package Synnotech.Core`
 - **Visual Studio Package Manager Console**: `Install-Package Synnotech.Core`
 
